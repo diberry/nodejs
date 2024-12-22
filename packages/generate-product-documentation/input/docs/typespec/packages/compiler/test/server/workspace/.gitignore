@@ -1,3 +1,0 @@
-# not ignore here which is for testing
-!node_modules/
-!**/package.json
