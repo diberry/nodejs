@@ -19,7 +19,11 @@
     "typescript": "^5.7.2"
   },
   "dependencies": {
+    "@langchain/community": "^0.3.19",
     "@langchain/core": "^0.3.26",
+    "@langchain/langgraph": "^0.2.34",
+    "@langchain/openai": "^0.3.16",
+    "cheerio": "^1.0.0",
     "dotenv": "^16.4.7",
     "langchain": "^0.3.7",
     "module-alias": "^2.2.3"
