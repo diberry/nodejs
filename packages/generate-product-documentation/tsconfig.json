@@ -1,0 +1,29 @@
+{
+    "compilerOptions": {
+      "module": "NodeNext",
+      "target": "ESNext",
+      "moduleResolution": "NodeNext",
+  
+      "outDir": "dist",
+      "rootDir": "./src",
+  
+      "strict": true,
+      "noImplicitAny": true,
+  
+      "sourceMap": true,
+      "resolveJsonModule": true,
+      "esModuleInterop": true,
+      "skipLibCheck": true,
+
+      "paths": {
+        "@utils/*": ["./src/utils/*"], // Path alias for utils folder
+        "@loaders/*": ["./src/loaders/*"], // Example for loaders
+        "@chains/*": ["./src/chains/*"], // Example for chains
+        "@agents/*": ["./src/agents/*"], // Example for agents
+        "@config/*": ["./src/config/*"] // Example for config
+      },
+
+    },
+    "include": ["src/**/*", "tests/**/*"],
+    "exclude": ["node_modules", "dist"]
+  }

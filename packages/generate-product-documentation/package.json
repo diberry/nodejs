@@ -1,0 +1,35 @@
+{
+  "name": "generate-product-documentation",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "preprocess": "node scripts/preprocessDocs.js",
+    "run": "node src/index.js",
+    "test": "jest",
+    "clean": "rm -rf output/temp/*"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/jest": "^29.5.14",
+    "@types/node": "^22.10.2",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.2.5",
+    "typescript": "^5.7.2"
+  },
+  "dependencies": {
+    "module-alias": "^2.2.3"
+  },
+  "_moduleAliases": {
+    "@utils/*": [
+      "src/utils/*"
+    ],
+    "@components/*": [
+      "src/components/*"
+    ]
+  }
+}

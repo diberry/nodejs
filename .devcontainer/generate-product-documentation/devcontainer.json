@@ -19,7 +19,7 @@
 			"git.openRepositoryInParentFolders": "always"
 		}
 	},
-    "workspaceFolder": "/workspaces/nodejs/packages/generate-product-documentation"
-	
+    "workspaceFolder": "/workspace/packages/generate-product-documentation",
+    "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind"
 
 }
