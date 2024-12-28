@@ -1,0 +1,23 @@
+{
+    "compilerOptions": {
+        "module": "NodeNext",
+        "target": "ESNext",
+        "moduleResolution": "NodeNext",
+        "outDir": "dist",
+        "rootDir": "./src",
+        "strict": true,
+        "noImplicitAny": false,
+        "sourceMap": true,
+        "resolveJsonModule": true,
+        "esModuleInterop": true,
+        "skipLibCheck": true
+    },
+    "include": [
+        "src/**/*"
+, "old/elasticSearchClass.ts", "old/elasticSearchUser.ts", "old/doc_manager.ts", "old/openai_runnable_with_memory.ts", "old/react.ts", "old/tools.ts"    ],
+    "exclude": [
+        "node_modules",
+        "dist",
+        "old"
+    ]
+}

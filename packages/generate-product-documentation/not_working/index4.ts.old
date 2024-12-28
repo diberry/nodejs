@@ -1,0 +1,103 @@
+import { TextLoader } from 'langchain/document_loaders'
+import { CharacterTextSplitter } from 'langchain/text_splitter'
+import { OpenAIEmbeddings } from 'langchain/embeddings'
+import { HNSWLib } from 'langchain/vectorstores'
+import { RetrievalQAChain } from 'langchain/chains'
+import { OpenAI } from 'langchain/llms/openai'
+import { PromptTemplate } from 'langchain'
+import { LLMChain } from "langchain/chains";
+
+import { ChatPromptTemplate } from "@langchain/core/prompts";
+import { ChatOpenAI } from "@langchain/openai";
+
+// Load documents
+async function loadDocuments(filePath: string) {
+  const loader = new TextLoader(filePath) // Load text files
+  const docs = await loader.load()
+
+  // Split large documents into chunks
+  const splitter = new CharacterTextSplitter({
+    chunkSize: 1000,
+    chunkOverlap: 100,
+  })
+  return splitter.splitDocuments(docs)
+}
+
+// Create a vector store for retrieval
+async function createVectorStore(documents) {
+  const embeddings = new OpenAIEmbeddings({
+    openAIApiKey: process.env.OPENAI_API_KEY,
+  })
+  return HNSWLib.fromDocuments(documents, embeddings)
+}
+
+// Load and preprocess documents
+async function setupRetrieval(filePath: string) {
+  const documents = await loadDocuments(filePath)
+  return createVectorStore(documents)
+}
+
+// Initialize the LLM and Retrieval Chain
+async function generateContentWithRetrieval(query, retriever) {
+  const llm = new OpenAI({
+    openAIApiKey: process.env.OPENAI_API_KEY,
+    temperature: 0.7,
+  })
+  const chain = RetrievalQAChain.fromLLM(llm, retriever)
+
+  return chain.call({ query })
+}
+const whatIsPrompt = new PromptTemplate({
+  template: `
+    You are tasked with creating a customer-facing article using the following resources:
+
+### Style Guidance
+{guidance}
+
+### Engineering Documentation
+{engineeringDoc}
+
+### Article Structure Template
+{templateStructure}
+
+Write an article titled "{title}" following the structure and guidance provided.
+Fill in the sections of the template based on the engineering documentation.
+`,
+  inputVariables: ['retrievedContent', 'topic'],
+});
+
+/*
+const prompt = ChatPromptTemplate.fromTemplate("Tell me a {adjective} joke");
+const llm = new ChatOpenAI();
+const chain = prompt.pipe(llm);
+*/
+
+const response = await chain.invoke({ adjective: "funny" });
+
+
+async function generateWhatIsArticle(filePath: string, topic: string) {
+    const retriever = await setupRetrieval(filePath);
+    const retrievedContent = await generateContentWithRetrieval(
+      `Provide an overview and relevant details for the topic: ${topic}.`,
+      retriever.asRetriever()
+    );
+  
+    const renderedPrompt = await whatIsPrompt.format({
+      retrievedContent: retrievedContent.text,
+      topic,
+    });
+  
+    console.log("Generated Prompt:\n", renderedPrompt);
+  
+    // Use LangChain LLMChain to generate the article
+    const llm = new OpenAI({ openAIApiKey: process.env.OPENAI_API_KEY, temperature: 0.7 });
+    const articleChain = new LLMChain({ llm, prompt: whatIsPrompt });
+    const article = await articleChain.call({ retrievedContent: retrievedContent.text, topic });
+  
+    console.log("Generated Article:\n", article.text);
+  }
+  
+  const engineeringDoc = "./docs/engineering_doc.md";
+  const productName = "TypeSpec";
+
+  generateWhatIsArticle(engineeringDoc, productName);

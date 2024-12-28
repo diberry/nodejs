@@ -1,0 +1,35 @@
+{
+  "name": "langchain-agents-helloworld",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "format": "npx prettier . --write",
+    "start": "tsc && node -r dotenv/config dist/index.js",
+    "build": "tsc"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@elastic/elasticsearch": "^8.17.0",
+    "@langchain/anthropic": "^0.3.11",
+    "@langchain/community": "^0.3.19",
+    "@langchain/core": "^0.3.26",
+    "@langchain/langgraph": "^0.2.34",
+    "@langchain/openai": "^0.3.16",
+    "cheerio": "^1.0.0",
+    "dotenv": "^16.4.7",
+    "langchain": "^0.3.8",
+    "zod": "^3.24.1",
+    "module-alias": "^2.2.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.9.1",
+    "prettier": "3.3.3",
+    "@types/jest": "^29.5.14",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.2.5",
+    "typescript": "^5.7.2"
+  }
+}

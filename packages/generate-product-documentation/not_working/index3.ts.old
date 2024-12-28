@@ -1,0 +1,64 @@
+import { OpenAI } from "@langchain/openai";
+import { LLMChain } from "langchain/chains";
+import { PromptTemplate } from "@langchain/core/prompts";
+import { readFile } from "fs/promises";
+import * as dotenv from "dotenv";
+import path from "path";
+
+dotenv.config();
+
+const baseDir = __dirname;
+const engineeringDoc = await readFile(path.join(baseDir, "./src/docs/engineering_info.md"), "utf-8");
+const writingGuidanceDoc = await readFile(path.join(baseDir, "./src/docs/writing_guidance.md"), "utf-8");
+const contentTemplateDoc = await readFile(path.join(baseDir, "./src/docs/content_template.md"), "utf-8");
+const promptDoc = await readFile(path.join(baseDir, "./src/docs/prompt.md"), "utf-8");
+
+// Step 1: Load Guidance and Specs
+const styleGuidance = writingGuidanceDoc; // Example guidance
+const specs = {
+  title: "Quickstart Guide",
+  prompt: "Explain how to get started with our product."
+};
+
+// Step 2: Initialize OpenAI LLM
+const llm = new OpenAI({
+  openAIApiKey: process.env.OPENAI_API_KEY,
+  temperature: 0.7,
+});
+
+// Step 3: Define Prompt Template
+const prompt = new PromptTemplate({
+  template: `
+    You are a technical writer following this style guidance: "{styleGuidance}".
+    Write an article titled "{title}".
+    The content should include: {prompt}.
+  `,
+  inputVariables: ["styleGuidance", "title", "prompt"],
+});
+
+// Step 4: Run LLM Chain to Generate Content
+const chain = new LLMChain({ llm, prompt });
+
+async function generateArticle() {
+  console.log("Generating content...");
+  const articleContent = await chain.call({
+    styleGuidance,
+    title: specs.title,
+    prompt: specs.prompt,
+  });
+
+  console.log("Generated content:", articleContent.text);
+
+  // Step 5: Use Template to Format Article
+  const template = await fs.readFile("./templates/articleTemplate.ejs", "utf-8");
+//   const rendered = ejs.render(template, {
+//     title: specs.title,
+//     content: articleContent.text,
+//   });
+
+  // Step 6: Save to Output File
+  await fs.writeFile(`./output/${specs.title.replace(/\s+/g, "_")}.html`, rendered);
+  console.log("Article saved to output folder.");
+}
+
+generateArticle().catch(console.error);

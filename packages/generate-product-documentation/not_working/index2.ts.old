@@ -1,0 +1,54 @@
+import { OpenAI } from "@langchain/openai";
+import { Document } from "@langchain/core/documents";
+import { ConstitutionalChain, ConstitutionalPrinciple, AnalyzeDocumentChain, loadSummarizationChain } from "langchain/chains";
+import { PromptTemplate } from "@langchain/core/prompts";
+import { readFile } from "fs/promises";
+import path from "path";
+
+import dotenv from "dotenv";
+
+dotenv.config(); // Load environment variables from a .env file
+
+async function loadDocuments() {
+  const baseDir = __dirname;
+  const engineeringDoc = await readFile(path.join(baseDir, "./src/docs/engineering_info.md"), "utf-8");
+  const writingGuidanceDoc = await readFile(path.join(baseDir, "./src/docs/writing_guidance.md"), "utf-8");
+  const contentTemplateDoc = await readFile(path.join(baseDir, "./src/docs/content_template.md"), "utf-8");
+  const promptDoc = await readFile(path.join(baseDir, "./src/docs/prompt.md"), "utf-8");
+  return { engineeringDoc, writingGuidanceDoc, contentTemplateDoc, promptDoc };
+}
+
+
+// Step 5: Generate the markdown page
+async function main() {
+
+  const model = new OpenAI({
+    openAIApiKey: process.env.OPENAI_API_KEY, // Replace with your OpenAI API key
+    temperature: 0.7, // Controls the randomness of responses
+  });
+  
+  const { engineeringDoc, writingGuidanceDoc, contentTemplateDoc, promptDoc } = await loadDocuments();
+
+  const prompt = new PromptTemplate({
+    template: promptDoc,
+    inputVariables: ["engineering", "guidance", "template", "title"],
+  });
+
+  const title = "What is TypeSpec?";
+
+  const whatIsPrompt = new PromptTemplate({
+    template: promptDoc,
+
+
+  const renderedPrompt = await prompt.format({
+    writingGuidanceDoc,
+    engineeringDoc,
+    templateStructure: contentTemplateDoc, // Inject the article template here
+    title,
+  });
+
+  console.log(renderedPrompt);
+
+}
+
+main();
