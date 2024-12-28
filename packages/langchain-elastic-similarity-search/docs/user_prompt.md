@@ -1,0 +1,1 @@
+Write a `What is` article named `What is TypeSpec?` Use the engineering documentation, writing guidance, and content templates to generate the article.

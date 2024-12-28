@@ -1,5 +1,5 @@
 {
-  "name": "langchain-agents-helloworld",
+  "name": "langchain-elastic-similarity-search",
   "version": "1.0.0",
   "main": "index.js",
   "type": "module",

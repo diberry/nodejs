@@ -2,6 +2,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import { MemoryVectorStore } from "langchain/vectorstores/memory";
 import { OpenAIEmbeddings } from "@langchain/openai";
+import { GithubRepoLoader } from "@langchain/community/document_loaders/web/github";
 
 export interface DocSetMetadata{
   name?: string;
@@ -19,7 +20,7 @@ interface Document {
   metadata: Record<string, string>;
 }
 
-class DocumentationManager {
+export class DocumentationManager {
   private docSet: DocSet[] = [];
   private embeddings: OpenAIEmbeddings;
   private vectorStore: MemoryVectorStore | null = null;
@@ -30,15 +31,45 @@ class DocumentationManager {
     this.embeddings = new OpenAIEmbeddings();
   }
 
-  public async init(docSet: DocSet[]) {
+  public async init(docSet: DocSet[], load: boolean = true, split: boolean = true, embed: boolean = true): Promise<void> {
     this.docSet = docSet;
     const docPaths = docSet.map(doc => doc.path);
 
     console.log(docPaths);
 
-    this.documents = await this.loadDocuments(docPaths);
-    this.splitDocs = this.splitDocuments(this.documents);
+    if(load) {
+      this.documents = await this.loadDocuments(docPaths);
+    }
+    if(split) {
+      this.splitDocs = this.splitDocuments(this.documents);
+    }
     this.embedDocuments(this.splitDocs);
+  }
+
+  /**
+   * Load from full GitHub URL: https://github.com/langchain-ai/langchainjs
+   * @param repo 
+   * @param branch 
+   * @param recursive 
+   * @param maxConcurrency 
+   * @returns 
+   */
+  public async loadDocumentsFromGitHubRepo(repo: string, branch: string, recursive: boolean = false, maxConcurrency: number = 2): Promise<Document[]> {
+    const loader = new GithubRepoLoader(
+      repo,
+      {
+        branch,
+        recursive,
+        unknown: "warn",
+        maxConcurrency,
+      }
+    );
+    const docs = await loader.load();
+
+    // @ts-ignore
+    this.documents = docs;
+    // @ts-ignore
+    return docs;
   }
 
   /**
@@ -66,7 +97,7 @@ class DocumentationManager {
         });
       }
     }
-
+    this.documents = documents;
     return documents;
   }
 
@@ -76,7 +107,7 @@ class DocumentationManager {
    * Splits documents into smaller chunks for embedding.
    * @param documents Array of documents to split.
    */
-  private splitDocuments(documents: Document[]): Document[] {
+  public splitDocuments(documents: Document[]): Document[] {
     const chunkSize = 1000; // Example chunk size
     const splitDocs: Document[] = [];
 
@@ -97,7 +128,7 @@ class DocumentationManager {
    * Embeds documents and stores them in a vector store.
    * @param documents Array of documents to embed.
    */
-  private async embedDocuments(documents: Document[]): Promise<MemoryVectorStore | null> {
+  public async embedDocuments(documents: Document[]): Promise<MemoryVectorStore | null> {
     const texts = documents.map(doc => doc.content);
 
     // metadata includes path, name, category, scenario

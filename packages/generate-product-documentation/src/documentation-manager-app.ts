@@ -48,7 +48,7 @@ async function main() {
   const resultsToReturn = 3;
 
   // Query for relevant documents
-  const results = await docManager.retrieveDocuments('What is typespec?', resultsToReturn, {filters: })
+  const results = await docManager.retrieveDocuments('What is typespec?', resultsToReturn)
   console.log(results)
 
   
