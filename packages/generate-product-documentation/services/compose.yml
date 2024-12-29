@@ -9,8 +9,8 @@ services:
       - 5432:5432
     restart: always
     environment:
-      - POSTGRES_DB=api
-      - POSTGRES_USER=myuser
-      - POSTGRES_PASSWORD=ChangeMe
-    volumes:
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    # volumes:
+    #   - ./init.sql:/docker-entrypoint-initdb.d/init.sql

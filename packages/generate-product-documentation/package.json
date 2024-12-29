@@ -7,7 +7,8 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js",
-    "start:docMgrGitHub": "npm run build && node -r dotenv/config dist/index_from_github.js"
+    "start:docMgrGitHub": "npm run build && node -r dotenv/config dist/index_from_github.js",
+    "start:pgVector": "node -r dotenv/config dist/pgvector_embed.js"
   },
   "keywords": [],
   "author": "",
@@ -28,7 +29,8 @@
     "dotenv": "^16.4.7",
     "ignore": "^5.3.2",
     "langchain": "^0.3.7",
-    "module-alias": "^2.2.3"
+    "module-alias": "^2.2.3",
+    "pg": "^8.13.1"
   },
   "_moduleAliases": {
     "@utils/*": [
