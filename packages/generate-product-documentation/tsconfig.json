@@ -24,6 +24,6 @@
       },
 
     },
-    "include": ["src/**/*", "tests/**/*", "not_working/index.ts", "not_working/index2.ts"],
+    "include": ["src/**/*", "tests/**/*"],
     "exclude": ["node_modules", "dist"]
   }
