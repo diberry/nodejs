@@ -21,6 +21,7 @@
     "typescript": "^5.7.2"
   },
   "dependencies": {
+    "@azure/search-documents": "^12.1.0",
     "@langchain/community": "^0.3.19",
     "@langchain/core": "^0.3.26",
     "@langchain/langgraph": "^0.2.34",
