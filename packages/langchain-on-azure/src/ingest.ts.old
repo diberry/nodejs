@@ -1,0 +1,133 @@
+import { LaunchOptions, PlaywrightGotoOptions, PlaywrightEvaluate, PlaywrightWebBaseLoader, Page, Browser } from "@langchain/community/document_loaders/web/playwright";
+import { LangChain } from "langchain";
+import { CosmosClient } from "@azure/cosmos";
+import { htmlToText } from 'html-to-text';
+import { SearchClient, SearchIndexClient, AzureKeyCredential, AzureAISearchQueryType } from "@azure/search-documents";
+
+const client = new CosmosClient(process.env.AZURE_COSMOS_DB_CONNECTION_STRING);
+const database = client.database('E-Learning');
+const container = database.container('EducationalContent');
+
+const searchClient = new SearchClient(
+  process.env.AZURE_AI_SEARCH_ENDPOINT,
+  process.env.AZURE_AI_SEARCH_INDEX_NAME,
+  new AzureKeyCredential(process.env.AZURE_AI_SEARCH_API_KEY)
+);
+
+type PlaywrightWebBaseLoaderOptions = {
+  launchOptions?: LaunchOptions;
+  gotoOptions?: PlaywrightGotoOptions;
+  evaluate?: PlaywrightEvaluate;
+};
+
+// Function to scrape content from a URL using Playwright
+async function scrapeContent(url: string) {
+  const loader = new PlaywrightWebBaseLoader(
+    url,
+    {
+      launchOptions: {
+        headless: true,
+      },
+      gotoOptions: {
+        waitUntil: "domcontentloaded",
+      },
+      async evaluate(url: string, page: Page, browser: Browser, response: Response | null) {
+        await page.waitForResponse(url);
+        const result = await page.evaluate(() => document.body.innerHTML);
+        return result;
+      }
+    }
+  );
+
+  const docs = await loader.load();
+  return docs;
+}
+
+// Function to convert HTML content to plain text and chunk it
+function convertAndChunkContent(htmlContent: string) {
+  const plainText = htmlToText(htmlContent, {
+    wordwrap: 130,
+  });
+
+  const chunkSize = 1000; // Define the chunk size
+  const chunks = [];
+  for (let i = 0; i < plainText.length; i += chunkSize) {
+    chunks.push(plainText.slice(i, i + chunkSize));
+  }
+
+  return chunks;
+}
+
+// Function to process content using LangChain
+async function processContentWithLangChain(chunks: string[]) {
+  const langChain = new LangChain();
+  const processedChunks = [];
+
+  for (const chunk of chunks) {
+    const processedContent = await langChain.processContent(chunk);
+    processedChunks.push(processedContent);
+  }
+
+  return processedChunks;
+}
+
+// Function to store content in Cosmos DB
+async function storeInCosmosDB(content: string) {
+  await container.items.create({
+    content,
+    timestamp: new Date().toISOString(),
+  });
+}
+
+// Function to store content in Azure Cognitive Search
+async function storeInAzureSearch(content: string) {
+  await searchClient.uploadDocuments([
+    {
+      id: `${Date.now()}-${Math.random()}`,
+      content,
+      timestamp: new Date().toISOString(),
+    }
+  ]);
+}
+
+
+// Create Azure AI Search vector store
+async function createSearchVectorStore(){
+    const store = await AzureAISearchVectorStore.fromDocuments(
+          documents,
+          new OpenAIEmbeddings(),
+          {
+            search: {
+              type: AzureAISearchQueryType.SimilarityHybrid,
+            },
+          }
+        );
+    return store
+}
+
+async function findSimilarityInVectorStore(query:string){
+
+    // Performs a similarity search
+    const resultDocuments = await store.similaritySearch(query);
+    return resultDocuments[0].pageContent;
+}
+
+// Main function to orchestrate the scraping and storing process
+async function scrapeAndIngest(url: string) {
+  try {
+    const htmlContent = await scrapeContent(url);
+    const chunks = convertAndChunkContent(htmlContent);
+    const processedChunks = await processContentWithLangChain(chunks);
+
+    for (const processedContent of processedChunks) {
+      await storeInCosmosDB(processedContent);
+      await storeInAzureSearch(processedContent);
+    }
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+
+// Example usage
+scrapeAndIngest('https://www.khanacademy.org/math/algebra').catch(console.error);
