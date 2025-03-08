@@ -1,0 +1,43 @@
+{
+    "name": "your-index-name",
+    "fields": [
+        {
+            "name": "id",
+            "type": "Edm.String",
+            "key": true,
+            "searchable": false,
+            "filterable": false,
+            "sortable": false,
+            "facetable": false,
+            "retrievable": true
+        },
+        {
+            "name": "content",
+            "type": "Edm.String",
+            "searchable": true,
+            "filterable": false,
+            "sortable": false,
+            "facetable": false,
+            "retrievable": true
+        },
+        {
+            "name": "fileName",
+            "type": "Edm.String",
+            "searchable": false,
+            "filterable": true,
+            "sortable": true,
+            "facetable": false,
+            "retrievable": true
+        },
+        {
+            "name": "embedding",
+            "type": "Collection(Edm.Single)",
+            "dimensions": 1536,
+            "searchable": false,
+            "filterable": false,
+            "sortable": false,
+            "facetable": false,
+            "retrievable": true
+        }
+    ]
+}

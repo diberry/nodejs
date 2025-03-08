@@ -1,0 +1,75 @@
+import { tool } from "@langchain/core/tools";
+import { ChatOpenAI } from "@langchain/openai";
+import { ingestFilesToAzureSearch } from "./ingest-files";
+import { summarizeDocuments, classifyDocumentTopics, azureAISearch } from "./tools.ts.old";
+import { ChatPromptTemplate } from "@langchain/core/prompts";
+import { createReactAgent } from "@langchain/langgraph/prebuilt";
+
+import { AzureOpenAI } from "@langchain/openai";
+import { cache } from "./semantic-cache";
+
+const llm = new AzureOpenAI({
+  azureOpenAIApiKey: "<your_key>", // In Node.js defaults to process.env.AZURE_OPENAI_API_KEY
+  azureOpenAIApiInstanceName: "<your_instance_name>", // In Node.js defaults to process.env.AZURE_OPENAI_API_INSTANCE_NAME
+  azureOpenAIApiDeploymentName: "<your_deployment_name>", // In Node.js defaults to process.env.AZURE_OPENAI_API_DEPLOYMENT_NAME
+  azureOpenAIApiVersion: "<api_version>", // In Node.js defaults to process.env.AZURE_OPENAI_API_VERSION
+  cache,
+});
+
+// Create a Tool for Azure AI Search
+const azureSearchTool = tool(azureAISearch, {
+  name: "AzureAI_Search",
+  description: "Searches Azure AI data using a query string.",
+});
+
+// Create a Tool for Document Summarization
+const summarizationTool = tool(summarizeDocuments, {
+  name: "Document_Summarizer",
+  description: "Summarizes documents from Azure AI Search for a given query.",
+});
+
+// Create a Tool for Document Topic Classification
+const topicClassifierTool = tool(classifyDocumentTopics, {
+  name: "Document_Topic_Classifier",
+  description:
+    "Identifies and lists the main topics from documents in Azure AI Search for a given query.",
+});
+
+const filesToIngest: string[] = [
+  "C:/Users/diberry/repos/langchain-on-azure/files/sample.txt",
+  "C:/Users/diberry/repos/langchain-on-azure/files/document.pdf",
+];
+
+const prompt = ChatPromptTemplate.fromMessages([
+  ["system", "You are a helpful assistant"],
+  ["placeholder", "{chat_history}"],
+  ["human", "{input}"],
+  ["placeholder", "{agent_scratchpad}"],
+]);
+
+const tools = [azureSearchTool, summarizationTool, topicClassifierTool];
+
+// Instead of using createToolCallingAgent and AgentExecutor, we now use LangGraph's createReactAgent.
+const reactAgent = createReactAgent({
+  llm,
+  tools,
+  prompt,
+});
+
+const query = "What is LangChain?";
+
+async function main() {
+  await ingestFilesToAzureSearch(filesToIngest);
+  // Using LangGraph's React Agent which expects messages instead of a simple input string.
+  let agentOutput = await reactAgent.invoke({
+    messages: [
+      {
+        role: "user",
+        content: query,
+      },
+    ],
+  });
+  console.log(agentOutput);
+}
+
+main().catch(console.error);
