@@ -7,7 +7,7 @@ This solution architecture mimics Farzad Sunavala's data sources, tools, and age
 * Structured preexisting data of stateful/historical information in Cosmos DB
 * blocked - Real-time web search - Bing Search v7 has been replaced with AI Agent with Bing grounding - how does this integrate with framework orchestrators which have their own agentic implementation
 
-## System prep 
+## System prep - azd provision - provision posthook for data ingestion
 
 Completed with Azure Developer CLI + Bicep.
 
@@ -35,6 +35,21 @@ You can call these tools in any order, multiple times if needed, to gather all t
 Stop calling tools only when you have enough information to provide a final, cohesive answer.
 Then output your final answer to the user.
 
+## Hosting
+
+- Functions runtime limited for max runtime
+- Better suited for container apps
+
+## Evaluations
+
+- Yohan - Langchain not great at evaluations
+- Yohan uses https://www.promptfoo.dev/
+
+## Tracing
+
+- Yohan - LangChain - env variable to see all traces - debug flag to see all traces - 
+- Yohan - Extend your own traces - to Azure OpenTelemetry - 
+
 ## LangChain and LangGraph integration
 
 ### AI Search vector store
@@ -59,13 +74,20 @@ Retreiver methods:
 
 Search methods:
 
+* **similaritySearch** - *** - showcase different options - semantic ranker with hybrid search
+
+
+* maxMarginalRelevanceSearch - *** - built in reranking - not recommended for AI Search - there for compatibility with other integration
 * hybridSearchVectorWithScore
-* maxMarginalRelevanceSearch
 * semanticHybridSearchVectorWithScore
-* similaritySearch
 * similaritySearchVectorWithScore
 * similaritySearchWithScore
 
+Yohan - PDF loader 3rd data - 
+schema - open discussion - use specific keys for content and metadata - abstraction with default schema - uses smart default for content - 
+
+if you had geographic data and wanted to index it differently
+or metadata that you wanted to search these extra fields
 
 
 #### Load unstructured documents into Azure Search AI with default schema
@@ -321,3 +343,8 @@ await chain.invoke({
   input: "I love programming.",
 });
 ```
+
+#### Evaluations with Foundry
+
+#### Tracing with Foundry
+
