@@ -151,7 +151,7 @@ retrievedDocuments[0].pageContent;
 const llm = new AzureOpenAI({ 
     model: "gpt-3.5-turbo-1106",
     azureOpenAIApiKey: "<your_key>", // In Node.js defaults to process.env.AZURE_OPENAI_API_KEY
-    azureOpenAIApiInstanceName: "<your_instance_name>", // In Node.js defaults to process.env.AZURE_OPENAI_API_INSTANCE_NAME
+    azureOpenAIApiInstanceName: "<your_instance_name>", // In Node.js defaults to process.env.AZURE_OPENAI_EMBEDDING_INSTANCE
     azureOpenAIApiDeploymentName: "<your_deployment_name>", // In Node.js defaults to process.env.AZURE_OPENAI_API_DEPLOYMENT_NAME
     azureOpenAIApiVersion: "<api_version>", // In Node.js defaults to process.env.AZURE_OPENAI_API_VERSION
     temperature: 0,
@@ -243,7 +243,7 @@ import { AzureOpenAI } from "langchain/llms/azure_openai";
 const llm = new AzureOpenAI({
   model: "gpt-3.5-turbo-1106",
   azureOpenAIApiKey: process.env.AZURE_OPENAI_API_KEY,
-  azureOpenAIApiInstanceName: process.env.AZURE_OPENAI_API_INSTANCE_NAME,
+  azureOpenAIApiInstanceName: process.env.AZURE_OPENAI_EMBEDDING_INSTANCE,
   azureOpenAIApiDeploymentName: process.env.AZURE_OPENAI_API_DEPLOYMENT_NAME,
   azureOpenAIApiVersion: process.env.AZURE_OPENAI_API_VERSION,
   maxRetries: 2,
@@ -312,7 +312,7 @@ LangChain class is [AzureOpenAI](https://v03.api.js.langchain.com/classes/_langc
 const llm = new AzureOpenAI({ 
     model: "gpt-3.5-turbo-1106",
     azureOpenAIApiKey: "<your_key>", // In Node.js defaults to process.env.AZURE_OPENAI_API_KEY
-    azureOpenAIApiInstanceName: "<your_instance_name>", // In Node.js defaults to process.env.AZURE_OPENAI_API_INSTANCE_NAME
+    azureOpenAIApiInstanceName: "<your_instance_name>", // In Node.js defaults to process.env.AZURE_OPENAI_EMBEDDING_INSTANCE
     azureOpenAIApiDeploymentName: "<your_deployment_name>", // In Node.js defaults to process.env.AZURE_OPENAI_API_DEPLOYMENT_NAME
     azureOpenAIApiVersion: "<api_version>", // In Node.js defaults to process.env.AZURE_OPENAI_API_VERSION
     temperature: 0,

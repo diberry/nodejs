@@ -34,7 +34,7 @@ async function main() {
     console.log("Similarity search results:");
     console.log(resultDocuments[0]);
 
-    const getChatClient = getAzureChatOpenAI();
+    const chatClient = getAzureChatOpenAI();
     console.log("Chat client created");
 
     const questionAnsweringPrompt = ChatPromptTemplate.fromMessages([
@@ -46,7 +46,7 @@ async function main() {
     ]);
     console.log("Prompt messages created");
 
-    const combineDocsChain = await createCombineDocsChainWrapper(getChatClient, questionAnsweringPrompt);
+    const combineDocsChain = await createCombineDocsChainWrapper(chatClient, questionAnsweringPrompt);
     console.log("Combine docs chain created");
 
     const retrievalChain = await createRetrievalChainWrapper(vectorStoreClient, combineDocsChain);

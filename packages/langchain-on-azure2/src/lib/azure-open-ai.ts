@@ -2,16 +2,16 @@ import { AzureOpenAIEmbeddings, AzureOpenAIInput, AzureChatOpenAI } from "@langc
 
 import 'dotenv/config'
 
-// Azure OpenAI Instance
-const azureOpenAIApiInstanceName= process.env.AZURE_OPENAI_API_INSTANCE_NAME;
-const azureOpenAIApiKey= process.env.AZURE_OPENAI_API_INSTANCE_KEY;
+// Azure OpenAI Instance - embedding
+const azureOpenAIApiInstanceName= process.env.AZURE_OPENAI_EMBEDDING_INSTANCE;
+const azureOpenAIApiKey= process.env.AZURE_OPENAI_EMBEDDING_KEY;
+const embeddingDeployment= "text-embedding-ada-002";
+const embeddingApiVersion= "2023-05-15";
 
-// Azure OpenAI model for embeddings
-const azureOpenAIApiEmbeddingsDeploymentName= "text-embedding-ada-002";
-const azureOpenAIEmbeddingsApiVersion= "2023-05-15";
-
-// Azure OpenAI model for chat
-const chatDeployment = "gpt-4o-mini"
+// Azure OpenAI Instance - chat
+const azureOpenAIApiChatInstanceName= process.env.AZURE_OPENAI_CHAT_INSTANCE;
+const azureOpenAIApiChatKey= process.env.AZURE_OPENAI_CHAT_KEY;
+const chatDeployment = "gpt-4o-mini";
 const chatApiVersion = "2024-10-21";
 
 export function createEmbeddingClient(): AzureOpenAIEmbeddings{
@@ -19,8 +19,8 @@ export function createEmbeddingClient(): AzureOpenAIEmbeddings{
   const config = {
     azureOpenAIApiKey: azureOpenAIApiKey, 
     azureOpenAIApiInstanceName: azureOpenAIApiInstanceName, 
-    azureOpenAIApiEmbeddingsDeploymentName: azureOpenAIApiEmbeddingsDeploymentName, 
-    azureOpenAIApiVersion: azureOpenAIEmbeddingsApiVersion, 
+    azureOpenAIApiEmbeddingsDeploymentName: embeddingDeployment, 
+    azureOpenAIApiVersion: embeddingApiVersion, 
     maxRetries: 1,
   };
   console.log("Embeddings client ", config);
@@ -31,15 +31,15 @@ export function createEmbeddingClient(): AzureOpenAIEmbeddings{
 }
 export function getAzureChatOpenAI(temperature: number=0.3):AzureChatOpenAI{
 
-  const chatConfig:AzureOpenAIInput={
-    azureOpenAIApiKey: azureOpenAIApiKey, 
-    azureOpenAIApiInstanceName: azureOpenAIApiInstanceName, 
+  const chatConfig={
+    azureOpenAIApiKey: azureOpenAIApiChatKey, 
+    azureOpenAIApiInstanceName: azureOpenAIApiChatInstanceName, 
     azureOpenAIApiDeploymentName: chatDeployment, 
     azureOpenAIApiVersion: chatApiVersion
   };
   console.log("Chat client ", chatConfig);
 
-  const chatClient = new AzureChatOpenAI ({...chatConfig, model: chatConfig.azureOpenAIApiDeploymentName, temperature});
+  const chatClient = new AzureChatOpenAI (chatConfig);
   return chatClient;
 }
 

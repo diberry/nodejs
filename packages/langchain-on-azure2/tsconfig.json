@@ -13,6 +13,6 @@
       "allowSyntheticDefaultImports": true,
       "sourceMap": true
     },
-    "include": ["./src/**/*.ts", "src/index2.ts.old"],
+    "include": ["./src/**/*.ts"],
     "exclude": ["node_modules"]
 }
