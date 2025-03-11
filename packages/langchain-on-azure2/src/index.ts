@@ -1,61 +1,63 @@
-
-import {
-    AzureAISearchVectorStore,
-    AzureAISearchConfig,
-    AzureAISearchAddDocumentsOptions
-} from "@langchain/community/vectorstores/azure_aisearch";
-
 import 'dotenv/config'
 
-import { createEmbeddingClient, AzureOpenAIEmbeddingsOptions } from "./lib/create-embedding";
-import { createAzureAiSearchVectorStoreFromDocuments } from "./lib/create-vector-store";
+import { createEmbeddingClient, getAzureChatOpenAI, getChatCompletions } from "./lib/azure-open-ai";
+import { createAzureAiSearchVectorStoreFromDocuments, getSearchChain } from "./lib/azure-ai-search";
+import { ChatPromptTemplate } from "@langchain/core/prompts";
+
+
 import { loadTextFromFile } from "./lib/loaders";
-
-// Azure OpenAI
-const azureOpenAIApiEmbeddingsDeploymentName= process.env.AZURE_OPENAI_API_EMBEDDINGS_DEPLOYMENT_NAME;
-const azureOpenAIApiInstanceName= process.env.AZURE_OPENAI_API_INSTANCE_NAME;
-const azureOpenAIApiKey= process.env.AZURE_OPENAI_API_KEY;
-const azureOpenAIEmbeddingsApiVersion= process.env.EMBEDDING_API_VERSION;
-
-// Azure AI Search
-const azureAISearchApiKey= process.env.AZURE_AISEARCH_ADMIN_KEY;
-const azureAISearchEndpoint= process.env.AZURE_AISEARCH_ENDPOINT;
-const azureAISearchIndexName= process.env.AZURE_AISEARCH_INDEX_NAME;
-
+import { createCombineDocsChainWrapper, createRetrievalChainWrapper } from './lib/chains';
+const query = "What does Martin Luther King Jr. say about racial equality and freedom in his 'I Have a Dream' speech?";
 
 async function main() {
 
-    const embeddingsOptions: AzureOpenAIEmbeddingsOptions = {
-        azureOpenAIApiInstanceName: azureOpenAIApiInstanceName,
-        azureOpenAIApiDeploymentName: azureOpenAIApiEmbeddingsDeploymentName,
-        azureOpenAIApiKey: azureOpenAIApiKey,
-        azureOpenAIApiVersion: azureOpenAIEmbeddingsApiVersion
-    }
+    // Create embeddings client with specific embeddings model
+    const embeddingsClient = createEmbeddingClient();
 
-    const aiSearchConfig: AzureAISearchConfig = {
-        key: azureAISearchApiKey,
-        endpoint: azureAISearchEndpoint,
-        indexName: azureAISearchIndexName
-    };
-
-    const embeddingsClient = createEmbeddingClient(embeddingsOptions);
+    // Test client by embedding a query
     const embeddings = await embeddingsClient.embedQuery("Hello, world!");
     console.log(embeddings);
 
+    // Load document from file
     const documents = await loadTextFromFile("./files/i-have-a-dream.txt");
 
-    const vectorStore = await createAzureAiSearchVectorStoreFromDocuments(
+    // Create vector store with documents and embeddings client
+    const vectorStoreClient = await createAzureAiSearchVectorStoreFromDocuments(
         documents,
-        embeddingsClient,
-        aiSearchConfig
+        embeddingsClient
     );
 
-    const resultDocuments = await vectorStore.similaritySearch(
-        "What does Martin Luther King Jr. say about racial equality and freedom in his 'I Have a Dream' speech?"
-      );
-
+    // Test vector store by performing similarity search
+    const resultDocuments = await vectorStoreClient.similaritySearch(
+        query
+    );
     console.log("Similarity search results:");
     console.log(resultDocuments[0]);
+
+    const getChatClient = getAzureChatOpenAI();
+    console.log("Chat client created");
+
+    const questionAnsweringPrompt = ChatPromptTemplate.fromMessages([
+        [
+            "system",
+            "Answer the user's questions based on the below context:\n\n{context}",
+        ],
+        ["human", query],
+    ]);
+    console.log("Prompt messages created");
+
+    const combineDocsChain = await createCombineDocsChainWrapper(getChatClient, questionAnsweringPrompt);
+    console.log("Combine docs chain created");
+
+    const retrievalChain = await createRetrievalChainWrapper(vectorStoreClient, combineDocsChain);
+    console.log("Retrieval chain created");
+
+    const response = await retrievalChain.invoke({
+        input: query,
+    });
+
+    console.log("Chain response:");
+    console.log(response.answer);
 }
 
 main().catch(console.error);
