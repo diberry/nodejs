@@ -25,7 +25,7 @@ export function createEmbeddingClient(): AzureOpenAIEmbeddings{
   };
   console.log("Embeddings client ", config);
 
-  const embeddings = new AzureOpenAIEmbeddings();
+  const embeddings = new AzureOpenAIEmbeddings(config);
 
   return embeddings;
 }
