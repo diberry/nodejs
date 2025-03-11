@@ -37,7 +37,7 @@ Then output your final answer to the user.
 
 ## Hosting
 
-- Functions runtime limited for max runtime
+- Functions runtime limited for max runtime - durable ?
 - Better suited for container apps
 
 ## Evaluations

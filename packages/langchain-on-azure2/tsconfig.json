@@ -13,6 +13,6 @@
       "allowSyntheticDefaultImports": true,
       "sourceMap": true
     },
-    "include": ["./**/*.ts", "chat-with-your-data-quickstart.ts.old", "tools.ts.old"],
+    "include": ["./src/**/*.ts"],
     "exclude": ["node_modules"]
 }
