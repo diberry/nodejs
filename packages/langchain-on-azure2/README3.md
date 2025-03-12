@@ -25,6 +25,8 @@ It's important to use the same embedding model for data in both Azure AI Search 
  
 When you use different embedding models, the vectors may represent the data differently, leading to discrepancies in the similarity search results. By using the same embedding model, you can ensure that the vectors are aligned in the same vector space, making it easier for the Azure AI agent service to perform similarity searches and compare results from both Azure AI Search and Cosmos DB effectively.
 
+In LangChain.js the graph is an orchestration structure that connects various nodes (like agents, tools, and processing steps) to form a workflow. The agent is one such node that makes decisions and generates responses based on inputs and available tools. Essentially, the graph manages the flow and state transitions between nodes (including multiple invocations of the agent), while the agent handles the logic for interacting with language models and optionally its tools.
+
 ## Agentic flow
 1. query
 2. initialize tools - 3 tools
