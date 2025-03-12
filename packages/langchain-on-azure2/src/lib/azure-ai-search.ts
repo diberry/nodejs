@@ -50,6 +50,25 @@ export async function createAzureAiSearchVectorStoreFromDocuments(
     );
     return vectorStore;
 }
+export async function queryVectorStore(store: any, query:any ) {
+  if (!store) {
+    throw new Error("Vector store is not initialized.");
+  }
+  // Create a retriever from the vector store, you can pass parameters (e.g., number of documents)
+  const retriever = store.asRetriever({ count: 3 });
+  const retrievedDocuments = await retriever.invoke(query);
+  // For simplicity, join the page content of returned documents
+  return retrievedDocuments.map((doc:any) => doc.pageContent).join("\n---\n");
+}
+
+export function getQueryTool(store: any){
+    return {
+        name: "VectorStoreQuery",
+        description:
+          "Searches the Azure AI Search vector store for relevant context based on the user input.",
+        func: queryVectorStore.bind(null, store),
+    };
+}
 
 export async function getSearchChain(searchStore: any, openAiClient:any, query: string):Promise<string>{
     

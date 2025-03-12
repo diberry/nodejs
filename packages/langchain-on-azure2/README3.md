@@ -19,6 +19,12 @@ Completed with Azure Developer CLI + Bicep.
 * PDFs are ingested into Azure AI Search vector store
 * Data is uploaded to Cosmos DB
 
+By storing some data in Azure AI Search and some in Cosmos DB with its own vector store, you can leverage the Azure AI agent service to perform similarity searches across both data sources. The agent would query both Azure AI Search and Cosmos DB, compare the similarity search results, and determine which store has the closest match.
+ 
+It's important to use the same embedding model for data in both Azure AI Search and Cosmos DB. Using the same embedding model ensures that the vectors generated from your data are consistent and comparable across both data sources. This consistency is crucial for accurate similarity searches and comparisons.
+ 
+When you use different embedding models, the vectors may represent the data differently, leading to discrepancies in the similarity search results. By using the same embedding model, you can ensure that the vectors are aligned in the same vector space, making it easier for the Azure AI agent service to perform similarity searches and compare results from both Azure AI Search and Cosmos DB effectively.
+
 ## Agentic flow
 1. query
 2. initialize tools - 3 tools

@@ -1,12 +1,20 @@
 import 'dotenv/config'
-
+import { tool } from "@langchain/core/tools";
 import { createEmbeddingClient, getAzureChatOpenAI, getChatCompletions } from "./lib/azure-open-ai";
 import { createAzureAiSearchVectorStoreFromDocuments, getSearchChain } from "./lib/azure-ai-search";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
-
+import { MemorySaver } from "@langchain/langgraph";
+import { HumanMessage } from "@langchain/core/messages";
+import { createReactAgent } from "@langchain/langgraph/prebuilt";
 
 import { loadTextFromFile } from "./lib/loaders";
 import { createCombineDocsChainWrapper, createRetrievalChainWrapper } from './lib/chains';
+
+import { getVectorStoreDocumentsFromQueryTool } from "./lib/tool-azure-ai-search-2";
+
+
+
+
 const query = "What does Martin Luther King Jr. say about racial equality and freedom in his 'I Have a Dream' speech?";
 
 async function main() {
@@ -58,6 +66,20 @@ async function main() {
 
     console.log("Chain response:");
     console.log(response.answer);
+
+
+
+    const vectorStoreTool = getVectorStoreDocumentsFromQueryTool;
+
+
+    // Initialize memory to persist state between graph runs
+    // const agentCheckpointer = new MemorySaver();
+    // const agent = createReactAgent({
+    // llm: getAzureChatOpenAI(0),
+    // tools: agentTools,
+    // checkpointSaver: agentCheckpointer,
+    // });
+
 }
 
 main().catch(console.error);
