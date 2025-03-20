@@ -15,7 +15,7 @@ const chatApiVersion = "2024-10-21";
 async function main() {
 
     // Define the tools for the agent to use
-    const agentTools = [new TavilySearchResults({ maxResults: 3 })];
+    const agentTools = [new TavilySearchResults({ maxResults: 3 })]; // Real time search
     const agentModel = new AzureChatOpenAI({
         azureOpenAIApiKey: azureOpenAIApiChatKey,
         azureOpenAIApiInstanceName: azureOpenAIApiChatInstanceName,
