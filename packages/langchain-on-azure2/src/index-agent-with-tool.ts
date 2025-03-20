@@ -10,7 +10,7 @@ import { createReactAgent } from "@langchain/langgraph/prebuilt";
 import { loadTextFromFile } from "./lib/loaders";
 import { createCombineDocsChainWrapper, createRetrievalChainWrapper } from './lib/chains';
 
-import { tools, gpt4oMiniModel } from "./lib/tool-azure-ai-search-2";
+import { getVectorStoreDocumentsFromQueryTool, gpt4oMiniModel } from "./lib/tool-azure-ai-search-2";
 
 
 const query1 = "What actions are needed to achieve racial equality and freedom according to Martin Luther King Jr. in his 'I Have a Dream' speech?";
@@ -90,7 +90,7 @@ async function answerFromAgent() {
     const agentCheckpointer = new MemorySaver();
     const agent = createReactAgent({
         llm: gpt4oMiniModel,
-        tools: tools,
+        tools: [getVectorStoreDocumentsFromQueryTool],
         checkpointSaver: agentCheckpointer,
     });
 

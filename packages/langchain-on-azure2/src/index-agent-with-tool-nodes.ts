@@ -20,7 +20,7 @@ import {
   createRetrievalChainWrapper,
 } from "./lib/chains";
 import { TavilySearchResults } from "@langchain/community/tools/tavily_search";
-import { gpt4oMiniModel } from "./lib/tool-azure-ai-search-2";
+import { gpt4oMiniModel, getVectorStoreDocumentsFromQueryTool } from "./lib/tool-azure-ai-search-2";
 
 const query1 =
   "What actions are needed to achieve racial equality and freedom according to Martin Luther King Jr. in his 'I Have a Dream' speech?";
@@ -30,8 +30,8 @@ const query2 =
 
 const model = gpt4oMiniModel;
 //  const toolNode = new ToolNode(tools);
-const tools = [new TavilySearchResults({ maxResults: 3 })];
-const toolNode = new ToolNode(tools);
+//const tools = [new TavilySearchResults({ maxResults: 3 })];
+const toolNode = new ToolNode([getVectorStoreDocumentsFromQueryTool]);
 
 // Define the function that determines whether to continue or not
 function shouldContinue({ messages }: typeof MessagesAnnotation.State) {
