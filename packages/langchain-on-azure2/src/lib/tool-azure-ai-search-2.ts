@@ -28,5 +28,4 @@ export const getVectorStoreDocumentsFromQueryTool = tool(queryVectorStore, {
   description: getQueryDescription,
 });
 
-export const tools = [getVectorStoreDocumentsFromQueryTool];
 export const gpt4oMiniModel = model;
