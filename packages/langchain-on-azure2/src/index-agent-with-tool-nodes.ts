@@ -1,26 +1,30 @@
-import "dotenv/config";
 import { tool } from "@langchain/core/tools";
-import {
-  createEmbeddingClient,
-  getAzureChatOpenAI,
-  getChatCompletions,
-} from "./lib/azure-open-ai";
-import {
-  createAzureAiSearchVectorStoreFromDocuments,
-  getSearchChain,
-} from "./lib/azure-ai-search";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { MemorySaver } from "@langchain/langgraph";
 import { HumanMessage, AIMessage } from "@langchain/core/messages";
 import { createReactAgent, ToolNode } from "@langchain/langgraph/prebuilt";
 import { StateGraph, MessagesAnnotation } from "@langchain/langgraph";
-import { loadTextFromFile } from "./lib/loaders";
+import { TavilySearchResults } from "@langchain/community/tools/tavily_search";
+
+import "dotenv/config";
+
+import {
+  createEmbeddingClient,
+  getAzureChatOpenAI,
+  getChatCompletions,
+} from "./azure/azure-open-ai";
+import {
+  createAdminAzureAiSearchVectorStoreFromDocuments,
+  getSearchChain,
+} from "./azure/azure-ai-search-vector-store";
+
+import { loadTextFromFile } from "./langchain/loaders";
 import {
   createCombineDocsChainWrapper,
   createRetrievalChainWrapper,
-} from "./lib/chains";
-import { TavilySearchResults } from "@langchain/community/tools/tavily_search";
-import { gpt4oMiniModel, getVectorStoreDocumentsFromQueryTool } from "./lib/tool-azure-ai-search-2";
+} from "./langchain/chains";
+
+import { gpt4oMiniModel, getVectorStoreDocumentsFromQueryTool } from "./azure/tool-azure-ai-search";
 
 const query1 =
   "What actions are needed to achieve racial equality and freedom according to Martin Luther King Jr. in his 'I Have a Dream' speech?";
