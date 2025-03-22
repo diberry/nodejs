@@ -32,20 +32,48 @@ const query1 =
 const query2 =
   "What does Martin Luther King Jr. say are the harms to racial equality and freedom in his 'I Have a Dream' speech?";
 
+const aiSearchToolNode = new ToolNode([getVectorStoreDocumentsFromQueryTool]);
+// Maximum number of cycles allowed in the graph.
+const MAX_ITERATIONS = 2;
 const model = gpt4oMiniModel;
-//  const toolNode = new ToolNode(tools);
-//const tools = [new TavilySearchResults({ maxResults: 3 })];
-const toolNode = new ToolNode([getVectorStoreDocumentsFromQueryTool]);
+const tavilySearchTool = new TavilySearchResults({ maxResults: 3, topic: "MLK" });
+const tavilySearchNode = new ToolNode([tavilySearchTool]);
 
+
+// Update the workflow graph to include the new Tavily search node.
+// For example, add an edge from the agent node to the tavily node and back.
+function shouldInvokeTavily({ messages }: typeof MessagesAnnotation.State): boolean {
+  // As an example you might check if the last human message contains the keyword "latest"
+  const lastMessage = messages[messages.length - 1];
+  return typeof lastMessage?.content === "string" && lastMessage.content.toLowerCase().includes("latest");
+}
+async function logState(state: typeof MessagesAnnotation.State) {
+  console.log("LOG - Current state:", JSON.stringify(state, null, 2));
+  return state; // pass state along unmodified
+}
 // Define the function that determines whether to continue or not
-function shouldContinue({ messages }: typeof MessagesAnnotation.State) {
-  const lastMessage = messages[messages.length - 1] as AIMessage;
+function shouldContinue(state: typeof MessagesAnnotation.State & { iteration?: number }): string {
 
-  // If the LLM makes a tool call, then we route to the "tools" node
+  console.log("Iteration:", state.iteration);
+  const iteration = state.iteration ?? 0;
+
+  // debug
+  return "__end__";
+
+
+  // If we've reached the maximum iterations, end the graph.
+  if (iteration >= MAX_ITERATIONS) {
+    return "__end__";
+  }
+
+  // Example: if the last message from the agent contains a tool call, route to tools,
+  // otherwise, continue normally.
+  const lastMessage = state.messages[state.messages.length - 1] as AIMessage;
   if (lastMessage.tool_calls?.length) {
+    // Increase iteration count as we are recursing
+    state.iteration = iteration + 1;
     return "tools";
   }
-  // Otherwise, we stop (reply to the user) using the special "__end__" node
   return "__end__";
 }
 
@@ -59,20 +87,37 @@ async function callModel(state: typeof MessagesAnnotation.State) {
 
 async function answerFromGraph() {
   // Define a new graph
+  // const workflow = new StateGraph(MessagesAnnotation)
+  //   .addNode("agent", callModel)
+  //   .addEdge("__start__", "agent")
+  //   // Add the vector store tool node and its edge
+  //   .addNode("tools", aiSearchToolNode)
+  //   .addEdge("tools", "agent")
+  //   // Add the Tavily search node and its edges
+  //   .addNode("tavily", tavilySearchNode)
+  //   .addEdge("agent", "tavily")
+  //   .addEdge("tavily", "agent")
+  //   .addConditionalEdges("agent", shouldContinue);
+
   const workflow = new StateGraph(MessagesAnnotation)
     .addNode("agent", callModel)
-    .addEdge("__start__", "agent") // __start__ is a special name for the entrypoint
-    .addNode("tools", toolNode)
-    .addEdge("tools", "agent")
-    .addConditionalEdges("agent", shouldContinue);
+    .addEdge("__start__", "agent")
+    // Agent calls the vector store tool node ("tools")
+    .addNode("tools", aiSearchToolNode)
+    .addEdge("agent", "tools") // Agent output (from AI Search) is passed to tools
+
+    .addNode("logAfterTools", logState)
+    .addEdge("tools", "logAfterTools")
+    .addEdge("logAfterTools", "__end__");
 
   // Finally, we compile it into a LangChain Runnable.
   const app = workflow.compile();
 
+  const initialState = { messages: [new HumanMessage(query1)], iteration: 0 };
+
+
   // Use the agent
-  const finalState = await app.invoke({
-    messages: [new HumanMessage(query1)],
-  });
+  const finalState = await app.invoke(initialState);
   console.log(finalState.messages[finalState.messages.length - 1].content);
 
   const nextState = await app.invoke({
